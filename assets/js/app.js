@@ -53,8 +53,8 @@ const Templating = (arr) => {
                             <p>${b.content}</p>
                         </div>
                         <div class="card-footer d-flex justify-content-between">
-                            <button class="btn btn-sm btn-success">Edit</button>
-                            <button class="btn btn-sm btn-danger">Remove</button>
+                            <button class="btn btn-sm btn-success" onclick = "onEdit(this)">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick = "onRemove(this)">Remove</button>
                         </div>
                     </div>
 
@@ -65,11 +65,11 @@ const Templating = (arr) => {
 
 }
 
-const CreateCard = (obj,id) =>{
- 
+const CreateCard = (obj, id) => {
+
     let card = document.createElement("div");
 
-    card.id = id ;
+    card.id = id;
 
     card.className = "card mb-4";
 
@@ -82,16 +82,16 @@ const CreateCard = (obj,id) =>{
                             <p>${obj.content}</p>
                         </div>
                         <div class="card-footer d-flex justify-content-between">
-                            <button class="btn btn-sm btn-success">Edit</button>
-                            <button class="btn btn-sm btn-danger">Remove</button>
+                            <button class="btn btn-sm btn-success" onclick = "onEdit(this)">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick = "onRemove(this)">Remove</button>
                         </div>
     
     `;
 
     blogContainer.append(card);
     blogForm.reset();
-   
-} 
+
+}
 
 const MakeAPICall = async (apiURL, method, msgBody) => {
 
@@ -121,11 +121,38 @@ const MakeAPICall = async (apiURL, method, msgBody) => {
 
         SnackBar("error", err);
     }
-    finally{
+    finally {
 
-    spinner.classList.add("d-none");
+        spinner.classList.add("d-none");
 
     }
+}
+
+const PatchData = (obj) => {
+
+    title.value = obj.title;
+    content.value = obj.content;
+    userId.value = obj.userId;
+
+    submitBtn.classList.add("d-none");
+
+    updateBtn.classList.remove("d-none");
+}
+
+const UIupdate = (obj,id) =>{
+    
+    let card = document.getElementById(obj.id);
+
+    card.querySelector(".card-header h5").innerText = obj.title;
+    
+    card.querySelector(".card-body p").innerText = obj.content;
+
+    submitBtn.classList.remove("d-none");
+
+    updateBtn.classList.add("d-none");
+
+    blogForm.reset();
+
 }
 
 const FetchBlogs = async () => {
@@ -133,27 +160,63 @@ const FetchBlogs = async () => {
     let res = await MakeAPICall(blogsURL, "GET", null);
 
     let data = ConvertArray(res);
-   
+
     Templating(data);
 
 }
 
 FetchBlogs();
 
-const onSubmit = async (eve) =>{
+const onEdit = async (ele) => {
+
+    let EDIT_ID = ele.closest(".card").id;
+
+    let EDIT_URL = `${BaseURL}/blogs/${EDIT_ID}.json`;
+
+    localStorage.setItem("EDIT_ID", EDIT_ID);
+
+    let res = await MakeAPICall(EDIT_URL, "GET", null);
+
+    PatchData(res);
+}
+
+const onUpdate = async() => {
+
+    let UPDATE_ID = localStorage.getItem("EDIT_ID");
+
+    let UPDATE_URL = ` ${BaseURL}/blogs/${UPDATE_ID}.json`;
+
+    let UPDATE_OBJ = {
+
+        title: title.value,
+        content: content.value,
+        userId: userId.value,
+        id : UPDATE_ID
+    }
+
+    let res = await MakeAPICall(UPDATE_URL,"PATCH",UPDATE_OBJ);
+
+    cl(res);
+    
+    UIupdate(UPDATE_OBJ,UPDATE_ID);
+}
+
+const onSubmit = async (eve) => {
 
     eve.preventDefault();
 
     let blogObj = {
 
-        title : title.value,
-        content : content.value,
-        userId : userId.value
+        title: title.value,
+        content: content.value,
+        userId: userId.value
     }
 
-    let res = await MakeAPICall(blogsURL,"POST",blogObj);
+    let res = await MakeAPICall(blogsURL, "POST", blogObj);
 
-    CreateCard(blogObj,res.name);
+    CreateCard(blogObj, res.name);
 }
 
-blogForm.addEventListener("submit",onSubmit);
+blogForm.addEventListener("submit", onSubmit);
+
+updateBtn.addEventListener("click", onUpdate);
