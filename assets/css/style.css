@@ -1,0 +1,36 @@
+
+body{
+
+    background-color: #ededed;
+}
+
+.blogContainer .card{
+
+    transition: all .4s ease-in-out;
+}
+
+.blogContainer .card:hover{
+
+     transform: scale(1.01);
+     box-shadow: 5px 10px 10px #888;
+}
+
+.blogContainer h5{
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.spinner{
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width : 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255,255,255,.5);
+}
