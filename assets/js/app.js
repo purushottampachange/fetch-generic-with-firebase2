@@ -139,12 +139,12 @@ const PatchData = (obj) => {
     updateBtn.classList.remove("d-none");
 }
 
-const UIupdate = (obj,id) =>{
-    
+const UIupdate = (obj, id) => {
+
     let card = document.getElementById(obj.id);
 
     card.querySelector(".card-header h5").innerText = obj.title;
-    
+
     card.querySelector(".card-body p").innerText = obj.content;
 
     submitBtn.classList.remove("d-none");
@@ -180,7 +180,7 @@ const onEdit = async (ele) => {
     PatchData(res);
 }
 
-const onUpdate = async() => {
+const onUpdate = async () => {
 
     let UPDATE_ID = localStorage.getItem("EDIT_ID");
 
@@ -191,14 +191,38 @@ const onUpdate = async() => {
         title: title.value,
         content: content.value,
         userId: userId.value,
-        id : UPDATE_ID
+        id: UPDATE_ID
     }
 
-    let res = await MakeAPICall(UPDATE_URL,"PATCH",UPDATE_OBJ);
+    let res = await MakeAPICall(UPDATE_URL, "PATCH", UPDATE_OBJ);
 
     cl(res);
-    
-    UIupdate(UPDATE_OBJ,UPDATE_ID);
+
+    UIupdate(UPDATE_OBJ, UPDATE_ID);
+
+    SnackBar("success","card Updated successfully");
+}
+
+const onRemove = async (ele) => {
+
+    let result = await Swal.fire({
+        title: "Do you want to Remove ?",
+        showCancelButton: true,
+        confirmButtonText: "Remove",
+    })
+
+    if (result.isConfirmed) {
+
+        let REMOVE_ID = ele.closest(".card").id;
+
+        let REMOVE_URL = `${BaseURL}/blogs/${REMOVE_ID}.json`;
+
+        let res = await MakeAPICall(REMOVE_URL, "DELETE", null);
+
+        ele.closest(".card").remove();
+
+        SnackBar("success","card Removed successfully");
+    }
 }
 
 const onSubmit = async (eve) => {
@@ -215,6 +239,8 @@ const onSubmit = async (eve) => {
     let res = await MakeAPICall(blogsURL, "POST", blogObj);
 
     CreateCard(blogObj, res.name);
+
+    SnackBar("success","card Created successfully");
 }
 
 blogForm.addEventListener("submit", onSubmit);
